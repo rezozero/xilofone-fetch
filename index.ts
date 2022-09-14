@@ -76,7 +76,7 @@ if (!project.files || !project.files.length) {
 // get files to download
 await Promise.all(
     project.locales.map(async (locale) => {
-        const messageFile: XilofoneMessageFile | null = (await fetch(resolveURL(`/download/files/${fileID}/${locale}/json`), {
+        const messageFile: XilofoneMessageFile | null = (await fetch(resolveURL(`/download/files/${fileID}/${locale}/translated/json`), {
             headers: createHeaders(token),
         }).then((response) => response.json())) as XilofoneMessageFile | null
 
