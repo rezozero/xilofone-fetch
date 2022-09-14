@@ -44,7 +44,13 @@ const token = tokenResponse.token
 const file: XilofoneFile | null = await fetch(path.join(baseURL, 'api/files/', fileID), {
     headers: createHeaders(token),
 }).then((response) => response.json()) as File | null
-const projectID = file?.project?.['@id']
+
+if (!file) {
+    throw new Error(`There is no file with the ID ${fileID}.`)
+}
+
+const fileBaseName = file.name?.split('.').slice(0, -1).join('.') || ''
+const projectID = file.project?.['@id']
 
 if (!projectID) {
     throw new Error(`The file with the ID ${fileID} is not linked to a project.`)
@@ -75,7 +81,7 @@ await Promise.all(
         }).then((response) => response.json())) as XilofoneMessageFile | null
 
         if (messageFile) {
-            const outputFileName = path.join('./', output || '', locale + '.json')
+            const outputFileName = path.join('./', output || '', fileBaseName + '.' + locale + '.json')
 
             return fs.outputJson(outputFileName, messageFile, {
                 spaces: 2,
