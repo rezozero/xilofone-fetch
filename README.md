@@ -3,7 +3,7 @@ Fetch Xilofone messages and output them
 
 ## Installation
 
-`yarn add @rezo-zero/xilofone-fetch`
+`yarn add -D @rezo-zero/xilofone-fetch`
 
 ## Configuration
 
