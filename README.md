@@ -17,11 +17,7 @@ XILOFONE_OUTPUT=assets/locales/
 
 ## Usage
 
-```bash
-npx @rezo-zero/xilofone-fetch
-```
-
-or setup a custom npm script into package.json file
+Setup a custom npm script into package.json file
 
 ```json
 {
