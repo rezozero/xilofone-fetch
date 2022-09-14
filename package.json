@@ -1,6 +1,6 @@
 {
-    "name": "xilofone-fetch",
-    "version": "0.0.1",
+    "name": "@rezo-zero/xilofone-fetch",
+    "version": "0.0.2",
     "description": "Fetch Xilofone messages and output them",
     "engines": {
         "node": "^14"
