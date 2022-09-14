@@ -11,9 +11,8 @@ Fetch Xilofone messages and output them
 XILOFONE_BASE_URL=xilofone.example.com
 XILOFONE_USERNAME=user
 XILOFONE_PASSWORD=***********
-XILOFONE_PROJECT_ID=12
-XILOFONE_FILE_NAME=nuxt.xlf
-XILOFONE_OUTPUT=/assets/locales/
+XILOFONE_FILE_ID=12
+XILOFONE_OUTPUT=assets/locales/
 ```
 
 ## Usage
