@@ -7,6 +7,9 @@
     },
     "homepage": "https://github.com/rezozero/xilofone-fetch",
     "main": "dist/index.js",
+    "publishConfig": {
+        "access": "public"
+    },
     "type": "module",
     "scripts": {
         "dev": "yarn build && node dist/index.js",
