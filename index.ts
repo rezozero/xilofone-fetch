@@ -3,6 +3,16 @@ import * as dotenv from 'dotenv'
 import path from 'path'
 import fs from 'fs-extra'
 
+dotenv.config()
+
+const FILE_NAME_LOCALE_PATTERN = '{locale}'
+
+const baseURL = process.env.XILOFONE_BASE_URL
+const username = process.env.XILOFONE_USERNAME
+const password = process.env.XILOFONE_PASSWORD
+const fileID = process.env.XILOFONE_FILE_ID
+const output = process.env.XILOFONE_OUTPUT
+
 function resolveURL(...paths: string[]) {
     return path.join(baseURL || '', ...paths)
 }
@@ -13,13 +23,19 @@ function createHeaders(token: string) {
     })
 }
 
-dotenv.config()
+function getFileName(base: string, locale: string): string {
+    let fileName = base
 
-const baseURL = process.env.XILOFONE_BASE_URL
-const username = process.env.XILOFONE_USERNAME
-const password = process.env.XILOFONE_PASSWORD
-const fileID = process.env.XILOFONE_FILE_ID
-const output = process.env.XILOFONE_OUTPUT
+    if (fileName.includes(FILE_NAME_LOCALE_PATTERN)) {
+        fileName = fileName.replace(FILE_NAME_LOCALE_PATTERN, locale)
+    } else if (fileName.length > 0) {
+        fileName += '.' + locale
+    } else {
+        fileName = locale
+    }
+
+    return fileName + '.json'
+}
 
 if (!baseURL || !username || !password || !fileID) {
     throw new Error('Bad setup')
@@ -49,7 +65,7 @@ if (!file) {
     throw new Error(`There is no file with the ID ${fileID}.`)
 }
 
-const fileBaseName = file.name?.split('.').slice(0, -1).join('.') || ''
+const fileBaseName = process.env.XILOFONE_OUTPUT_FILE_NAME || file.name?.split('.').slice(0, -1).join('.') || ''
 const projectID = file.project?.['@id']
 
 if (!projectID) {
@@ -81,9 +97,10 @@ await Promise.all(
         }).then((response) => response.json())) as XilofoneMessageFile | null
 
         if (messageFile) {
-            const outputFileName = path.join('./', output || '', fileBaseName + '.' + locale + '.json')
+            const fileName = getFileName(fileBaseName, locale)
+            const filePath = path.join('./', output || '', fileName)
 
-            return fs.outputJson(outputFileName, messageFile, {
+            return fs.outputJson(filePath, messageFile, {
                 spaces: 2,
             })
         }
