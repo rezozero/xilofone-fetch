@@ -14,7 +14,13 @@ const fileID = process.env.XILOFONE_FILE_ID
 const output = process.env.XILOFONE_OUTPUT
 
 function resolveURL(...paths: string[]) {
-    return path.join(baseURL || '', ...paths)
+    if (!baseURL) {
+        throw new Error('XILOFONE_BASE_URL must not be empty.')
+    }
+    const baseURLWithProtocol = baseURL.match(`^https?:\/\/`) ?
+        baseURL :
+        'https://' + baseURL
+    return path.join(baseURLWithProtocol || '', ...paths)
 }
 
 function createHeaders(token: string) {
@@ -37,8 +43,17 @@ function getFileName(base: string, locale: string): string {
     return fileName + '.json'
 }
 
-if (!baseURL || !username || !password || !fileID) {
-    throw new Error('Bad setup')
+if (!baseURL) {
+    throw new Error('XILOFONE_BASE_URL must not be empty.')
+}
+if (!username) {
+    throw new Error('XILOFONE_USERNAME must not be empty.')
+}
+if (!password) {
+    throw new Error('XILOFONE_PASSWORD must not be empty.')
+}
+if (!fileID) {
+    throw new Error('XILOFONE_FILE_ID must not be empty.')
 }
 
 const formData = new FormData()
@@ -57,7 +72,7 @@ if (!tokenResponse || !tokenResponse.token) {
 const token = tokenResponse.token
 
 // get file
-const file: XilofoneFile | null = await fetch(path.join(baseURL, 'api/files/', fileID), {
+const file: XilofoneFile | null = await fetch(resolveURL('api/files/' + fileID), {
     headers: createHeaders(token),
 }).then((response) => response.json()) as File | null
 

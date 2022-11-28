@@ -8,7 +8,7 @@ Fetch Xilofone messages and output them
 ## Configuration
 
 ```dotenv
-XILOFONE_BASE_URL=xilofone.example.com
+XILOFONE_BASE_URL=https://xilofone.example.com
 XILOFONE_USERNAME=user
 XILOFONE_PASSWORD=***********
 XILOFONE_FILE_ID=12

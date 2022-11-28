@@ -3,7 +3,7 @@
     "version": "0.0.5",
     "description": "Fetch Xilofone messages and output them",
     "engines": {
-        "node": "^14"
+        "node": ">=14"
     },
     "homepage": "https://github.com/rezozero/xilofone-fetch",
     "main": "dist/index.js",

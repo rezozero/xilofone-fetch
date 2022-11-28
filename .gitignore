@@ -109,6 +109,7 @@ package.lock
 
 # dev output folder
 example/
+assets/locales
 
 # IDE / Editor
 .idea
