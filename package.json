@@ -1,6 +1,6 @@
 {
     "name": "@rezo-zero/xilofone-fetch",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Fetch translation messages from a Xilofone project and output them",
     "homepage": "https://github.com/rezozero/xilofone-fetch",
     "main": "dist/index.js",
