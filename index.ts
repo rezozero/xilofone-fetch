@@ -112,10 +112,13 @@ await Promise.all(
         }).then((response) => response.json())) as XilofoneMessageFile | null
 
         if (messageFile) {
+            // Xilofone returns an empty array if there are no translations, but we want an empty object to keep the file structure consistent
+            const formattedMessageFile = Array.isArray(messageFile) && !messageFile.length ? {} : messageFile
+
             const fileName = getFileName(fileBaseName, locale)
             const filePath = path.join('./', output || '', fileName)
 
-            return fs.outputJson(filePath, messageFile, {
+            return fs.outputJson(filePath, formattedMessageFile, {
                 spaces: 2,
             })
         }
