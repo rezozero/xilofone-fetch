@@ -20,7 +20,13 @@ function resolveURL(...paths: string[]) {
     const baseURLWithProtocol = baseURL.match(`^https?:\/\/`) ?
         baseURL :
         'https://' + baseURL
-    return path.join(baseURLWithProtocol || '', ...paths)
+    // Normalize paths by removing leading/trailing slashes before joining
+    const pathname = paths
+        .map(p => p.replace(/^\/+|\/+$/g, ''))
+        .filter(p => p.length > 0)
+        .join('/')
+
+    return new URL(pathname, baseURLWithProtocol).toString()
 }
 
 function createHeaders(token: string) {
