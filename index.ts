@@ -1,53 +1,16 @@
-import fetch, { FormData, Headers } from 'node-fetch'
+import fetch from 'node-fetch'
 import * as dotenv from 'dotenv'
 import path from 'path'
 import fs from 'fs-extra'
+import { resolveURL, createHeaders, fetchJSON, getFileName, authenticate, buildDownloadURL } from './client.js'
 
 dotenv.config()
-
-const FILE_NAME_LOCALE_PATTERN = '{locale}'
 
 const baseURL = process.env.XILOFONE_BASE_URL
 const username = process.env.XILOFONE_USERNAME
 const password = process.env.XILOFONE_PASSWORD
 const fileID = process.env.XILOFONE_FILE_ID
 const output = process.env.XILOFONE_OUTPUT
-
-function resolveURL(...paths: string[]) {
-    if (!baseURL) {
-        throw new Error('XILOFONE_BASE_URL must not be empty.')
-    }
-    const baseURLWithProtocol = baseURL.match(`^https?:\/\/`) ?
-        baseURL :
-        'https://' + baseURL
-    // Normalize paths by removing leading/trailing slashes before joining
-    const pathname = paths
-        .map(p => p.replace(/^\/+|\/+$/g, ''))
-        .filter(p => p.length > 0)
-        .join('/')
-
-    return new URL(pathname, baseURLWithProtocol).toString()
-}
-
-function createHeaders(token: string) {
-    return new Headers({
-        Authorization: 'Bearer ' + token,
-    })
-}
-
-function getFileName(base: string, locale: string): string {
-    let fileName = base
-
-    if (fileName.includes(FILE_NAME_LOCALE_PATTERN)) {
-        fileName = fileName.replace(FILE_NAME_LOCALE_PATTERN, locale)
-    } else if (fileName.length > 0) {
-        fileName += '.' + locale
-    } else {
-        fileName = locale
-    }
-
-    return fileName + '.json'
-}
 
 if (!baseURL) {
     throw new Error('XILOFONE_BASE_URL must not be empty.')
@@ -62,29 +25,13 @@ if (!fileID) {
     throw new Error('XILOFONE_FILE_ID must not be empty.')
 }
 
-const formData = new FormData()
-formData.append('username', username)
-formData.append('password', password)
-
-// get token
-const tokenResponse: TokenResponse | null = await fetch(resolveURL('/api/token'), { method: 'post', body: formData }).then(
-    (response) => response.json() as TokenResponse
-)
-
-if (!tokenResponse || !tokenResponse.token) {
-    throw new Error('No token available')
-}
-
-const token = tokenResponse.token
+// get token (v2 first, v1 fallback)
+const { token, isV2 } = await authenticate(baseURL, username, password)
 
 // get file
-const file: XilofoneFile | null = await fetch(resolveURL('api/files/' + fileID), {
+const file = await fetch(resolveURL(baseURL, 'api/files/' + fileID), {
     headers: createHeaders(token),
-}).then((response) => response.json()) as File | null
-
-if (!file) {
-    throw new Error(`There is no file with the ID ${fileID}.`)
-}
+}).then((response) => fetchJSON<XilofoneFile>(response))
 
 const fileBaseName = process.env.XILOFONE_OUTPUT_FILE_NAME || file.name?.split('.').slice(0, -1).join('.') || ''
 const projectID = file.project?.['@id']
@@ -94,13 +41,9 @@ if (!projectID) {
 }
 
 // get project
-const project: XilofoneProject | null = await fetch(resolveURL(projectID), {
+const project = await fetch(resolveURL(baseURL, projectID), {
     headers: createHeaders(token),
-}).then((response) => response.json()) as XilofoneProject | null
-
-if (!project) {
-    throw new Error('No project available for the ID ' + projectID)
-}
+}).then((response) => fetchJSON<XilofoneProject>(response))
 
 if (!project.locales) {
     throw new Error('No locale available for this project.')
@@ -113,9 +56,9 @@ if (!project.files || !project.files.length) {
 // get files to download
 await Promise.all(
     project.locales.map(async (locale) => {
-        const messageFile: XilofoneMessageFile | null = (await fetch(resolveURL(`/download/files/${fileID}/${locale}/translated/json`), {
+        const messageFile = await fetch(buildDownloadURL(baseURL, fileID, locale, isV2), {
             headers: createHeaders(token),
-        }).then((response) => response.json())) as XilofoneMessageFile | null
+        }).then((response) => fetchJSON<XilofoneMessageFile>(response))
 
         if (messageFile) {
             // Xilofone returns an empty array if there are no translations, but we want an empty object to keep the file structure consistent
