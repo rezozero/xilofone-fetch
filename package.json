@@ -1,7 +1,10 @@
 {
     "name": "@rezo-zero/xilofone-fetch",
-    "version": "0.1.1",
-    "description": "Fetch translation messages from a Xilofone project and output them",
+    "version": "0.2.0",
+    "description": "Fetch Xilofone messages and output them",
+    "engines": {
+        "node": ">=14"
+    },
     "homepage": "https://github.com/rezozero/xilofone-fetch",
     "main": "dist/index.js",
     "publishConfig": {
@@ -12,7 +15,8 @@
         "dev": "yarn build && node dist/index.js",
         "build": "tsc",
         "prepublishOnly": "yarn build",
-        "lint": "eslint --fix --ext \".js,.ts,.json\" ./src"
+        "lint": "eslint",
+        "release": "npm run lint && changelogen --release && npm publish && git push --follow-tags"
     },
     "keywords": [
         "xilofone",
@@ -26,6 +30,7 @@
         "@types/node": "^18.7.17",
         "@typescript-eslint/eslint-plugin": "^5.37.0",
         "@typescript-eslint/parser": "^5.37.0",
+        "changelogen": "^0.6.2",
         "eslint": "8.22.0",
         "eslint-config-prettier": "^8.5.0",
         "eslint-plugin-prettier": "^4.2.1",
